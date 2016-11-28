@@ -1,0 +1,59 @@
+---
+title: "phosphonormalizer: Pairwise normalization of phosphoproteomics data"
+author: "Sohrab Saraei, Tomi Suomi, Otto Kauko,Laura L. Elo"
+date: "October 11, 2016"
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{Pairwise normalization of phosphoproteomics data}
+    %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[utf8]{inputenc}
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Phosphoproteomics is identification, quantification and analysis of peptides that have phosphorylation as post-translational modification. Differential expression analysis of phosphopeptides between different samples would help study pathways and drug targets. Consequently, proper data normalization is a critical step in the workflow and median normalization is a common method that is utilized in this step of analysis. However, it is shown that global median normalization can introduce bias in the fold change of global phosphorylation between samples. It is suggested that by taking the non-enriched data into consideration, this bias could be compensated (Kauko et al. 2015).
+
+## Algorithm overview
+
+The phosphonormalizer package tries to find phosphopeptides that are present in both enriched and non-enriched datasets with the same sequence and modification. Phosphopeptides considered in the normalization procedure must be quantified in all samples. Additionally, phosphopeptides quantified multiple times are summed together. Moreover, ratios with maximum fold difference more than 1.5x interquartile range will be excluded (Kauko et al. 2015). 
+
+After finding the common phosphopeptides, the enriched/non-enriched ratios are calculated and normalized. The median of abundance ratios is used as pairwise normalization factor, which is used to normalize the enriched samples (Kauko et al. 2015).
+
+## Input data
+
+In order to use phosphonormalizer package, we assume that the experiment have been conducted on both enriched and non-enriched samples. These datasets must have the sequence, modification and abundance columns. The sequence and modification columns in the dataframe must be in character format and the abundance columns in numeric. The algorithm expects that the abundances are pre-normalized with median normalization (Kauko et al. 2015). This package also supports MSnSet data type from MSnbase package which is used in data preprocessing 
+step of bioconductor mass spectrometry proteomics workflow (see more: https://www.bioconductor.org/help/workflows/proteomics/).
+
+
+## Pairwise normalization
+
+The normalization begins by loading the phosphonormalizer package. Here for demonstration, the data used is from "enriched.rd" and "non.enriched.rd" are available with the package.
+
+## Installation
+
+To install this package, start R and enter:
+```{r eval=FALSE}
+## try http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+biocLite("phosphonormalizer")
+```
+
+
+```{r eval=FALSE}
+    #Load the library
+    library(phosphonormalizer)
+    #Specifying the column numbers of abundances in the original data.frame, 
+    #from both enriched and non-enriched runs
+    samplesCols <- data.frame(enriched=3:17, non.enriched=3:17)
+    #Specifying the column numbers of sequence and modification in the original data.frame, 
+    #from both enriched and non-enriched runs
+    modseqCols <- data.frame(enriched = 1:2, non.enriched = 1:2)
+    #The samples and their technical replicates
+    techRep <- factor(x = c(1,1,1,2,2,2,3,3,3,4,4,4,5,5,5))
+    #Call the function
+    norm <- normalizePhospho(enriched = enriched.rd, non.enriched = non.enriched.rd, 
+            samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep)
+```
