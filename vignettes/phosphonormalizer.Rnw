@@ -40,7 +40,7 @@ phosphonormalizer: Phosphoproteomics Normalization
 
 \section{Introduction}
 
-The phosphonormalizer package tries to find phosphopeptides that are present in both enriched and non-enriched datasets with the same sequence and modification. Phosphopeptides considered in the normalization procedure must be quantified in all samples. Additionally, phosphopeptides quantified multiple times are summed together. Moreover, ratios with maximum fold difference more than 1.5x interquartile range will be excluded (Kauko et al. 2015). 
+The phosphonormalizer package tries to find phosphopeptides that are present in both enriched and non-enriched datasets with the same sequence and modification. . If there is no common phosphopeptides between enriched and non-enriched samples the normalization is not possible and an error will be generated. Phosphopeptides considered in the normalization procedure must be quantified in all samples. Additionally, phosphopeptides quantified multiple times are summed together. Moreover, ratios with maximum fold difference more than 1.5x interquartile range will be excluded (Kauko et al. 2015). 
 
 After finding the common phosphopeptides, the enriched/non-enriched ratios are calculated and normalized. The median of abundance ratios is used as pairwise normalization factor, which is used to normalize the enriched samples (Kauko et al. 2015).
 
@@ -81,7 +81,8 @@ modseqCols <- data.frame(enriched = 1:2, non.enriched = 1:2)
 techRep <- factor(x = c(1,1,1,2,2,2,3,3,3,4,4,4,5,5,5))
 #Call the function
 norm <- normalizePhospho(enriched = enriched.rd, non.enriched = non.enriched.rd, 
-		samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep)
+		samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep, 
+	plot.fc = list(control = c(1,2), samples = c(3,4,5)))
 @
 
 
