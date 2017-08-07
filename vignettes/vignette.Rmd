@@ -30,7 +30,7 @@ step of bioconductor mass spectrometry proteomics workflow (see more: https://ww
 
 ## Pairwise normalization
 
-The normalization begins by loading the phosphonormalizer package. Here for demonstration, the data used is from "enriched.rd" and "non.enriched.rd" are available with the package.
+The normalization begins by loading the phosphonormalizer package. Here for demonstration, the data used is from "enriched.rd" and "non.enriched.rd" are available with the package. Boxplot of fold change distribution before and after pairwise normalization can also be generated.
 
 ## Installation
 
@@ -54,6 +54,7 @@ biocLite("phosphonormalizer")
     #The samples and their technical replicates
     techRep <- factor(x = c(1,1,1,2,2,2,3,3,3,4,4,4,5,5,5))
     #Call the function
-    norm <- normalizePhospho(enriched = enriched.rd, non.enriched = non.enriched.rd, 
-            samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep)
+	norm <- normalizePhospho(enriched = enriched.rd, non.enriched = non.enriched.rd, 
+	samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep, 
+	plot.fc = list(control = c(1,2), samples = c(3,4,5)))
 ```

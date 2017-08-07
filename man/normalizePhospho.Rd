@@ -3,7 +3,7 @@
 \title{Pairwise Normalization of MS-based phosphoproteomic data}
 \usage{
 normalizePhospho(enriched, non.enriched, phospho = NULL, 
-samplesCols, modseqCols, techRep)
+samplesCols, modseqCols, techRep, plot.fc=NULL)
 }
 \arguments{
 
@@ -28,6 +28,8 @@ samplesCols, modseqCols, techRep)
     
     \item{techRep}{a factor that holds information about columns order and the technical
     replicates of the samples}
+	
+	\item{plot.fc}{This parameter if set plots the fold change distribution before and after pairwise normalization. controls and samples should be set as named vectors in a list (look at the example)}
 }
 \value{
     A data.frame with the normalized values and their sequence and modification.
@@ -56,7 +58,8 @@ Maintainer: Sohrab Saraei <sohrab.saraei@utu.fi>
     techRep <- factor(x = c(1,1,1,2,2,2,3,3,3,4,4,4,5,5,5))
     #Call the function
     norm <- normalizePhospho(enriched = enriched.rd, non.enriched = non.enriched.rd, 
-            samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep)
+            samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep, 
+			plot.fc = list(control = c(1,2), samples = c(3,4,5)))
     head(norm)
 }
 \references{
