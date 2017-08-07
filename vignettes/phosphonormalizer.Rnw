@@ -58,7 +58,7 @@ The normalization begins by loading the phosphonormalizer package. Here for demo
 To install this package, start R and enter:
 
 
-<<Installation>>=
+<<eval=FALSE>>=
 
 
 ## try http:// if https:// URLs are not supported
@@ -66,7 +66,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("phosphonormalizer")
 @
 
-<<Example>>=
+<<eval=FALSE>>=
 
 
 #Load the library
@@ -81,8 +81,7 @@ modseqCols <- data.frame(enriched = 1:2, non.enriched = 1:2)
 techRep <- factor(x = c(1,1,1,2,2,2,3,3,3,4,4,4,5,5,5))
 #Call the function
 norm <- normalizePhospho(enriched = enriched.rd, non.enriched = non.enriched.rd, 
-		samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep, 
-		plot.fc = list(control = c(1,2), samples = c(3,4,5)))
+		samplesCols = samplesCols, modseqCols = modseqCols, techRep = techRep)
 @
 
 
