@@ -90,7 +90,8 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
   non.enriched[,"modSeq"] <- paste(non.enriched$seq, non.enriched$mod,sep = ", ")
   
   inter <- intersect(non.enriched$modSeq, enriched$modSeq)
-  if((length(inter) <= 0)) {stop("There are no common phosphopeptides in enriched and non-enriched samples!")}
+  
+  stopifnot(length(inter) > 0)
   enriched.olp.idx <- which(enriched$modSeq %in% inter)
   non.enriched.olp.idx <- which(non.enriched$modSeq %in% inter)
   
@@ -102,49 +103,65 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
   
   enriched.mat <- as.matrix(enriched.mat[, -c(1,2,ncol(enriched))])
   non.enriched.mat <- as.matrix(non.enriched.mat[, -c(1,2,ncol(enriched))])
-  
-  ratios <- non.enriched.mat/enriched.mat
-  colnames(ratios) <- as.numeric(techRep)
-  ratios.avg <- matrix(nrow = nrow(ratios), ncol = length(levels(techRep)))
-  
-  for (tr in levels(techRep)) {
-    ratios.avg[,as.numeric(tr)] <- rowMeans(ratios[,colnames(ratios) == levels(techRep)[as.numeric(tr)]])
-  }
-  
-  max.fc <- log2(ratios.avg[,1]) - log2(ratios.avg[,2])
-  
-  for (i in 2:(ncol(ratios.avg)-1)) {
-    for (j in (i+1):(ncol(ratios.avg))) {
-      max.fc <- matrixStats::rowMaxs(cbind(max.fc, log2(ratios.avg[,i]) - log2(ratios.avg[,j])))
+  if(length(inter) > 1) {
+    ratios <- non.enriched.mat/enriched.mat
+    
+    colnames(ratios) <- as.numeric(techRep)
+    ratios.avg <- matrix(nrow = nrow(ratios), ncol = length(levels(techRep)))
+    for (tr in levels(techRep)) {
+      if(nrow(ratios.avg) == 1) {
+        ratios.avg[,as.numeric(tr)] <- mean(ratios[,colnames(ratios) == levels(techRep)[as.numeric(tr)]])
+      } else {
+        ratios.avg[,as.numeric(tr)] <- rowMeans(ratios[,colnames(ratios) == levels(techRep)[as.numeric(tr)]])
+      }
     }
-  }
-  
-  boxp <- boxplot(max.fc, plot = FALSE)
-  ratios <- ratios[!(max.fc >= max(boxp$stats)),]
-  
-  ratios <- log10(ratios)
-  
-  col.sub <- rowMeans(ratios)
-  
-  ratios.norm <- ratios - col.sub
-  
-  factors <- 10^(matrixStats::colMedians(ratios.norm))
-  
-  enriched.normalized.mat <- t(t(enriched.original.mat) * factors)
-  if(!is.null(plot.fc)) {
-    for(i in plot.fc$control) {
-      for(j in plot.fc$samples) {
-        a.original <- rowMeans(log2(enriched.original.mat[,which(techRep==i)]+1),na.rm=TRUE)
-        b.original <- rowMeans(log2(enriched.original.mat[,which(techRep==j)]+1),na.rm=TRUE)
-        fc.original <- a.original - b.original
-        a.normnalized <- rowMeans(log2(enriched.normalized.mat[,which(techRep==i)]+1),na.rm=TRUE)
-        b.normnalized <- rowMeans(log2(enriched.normalized.mat[,which(techRep==j)]+1),na.rm=TRUE)
-        fc.normnalized <- a.normnalized - b.normnalized
-        boxplot(cbind(fc.original, fc.normnalized), range=1.5, outline=FALSE, main=paste0("Peptide log fold changes", " (sample ", j, " vs sample (control) ", i, ")"), names=c("Median normalized","Pairwise normalized"))
-        abline(h=0, lty=2)}
+    
+    
+    max.fc <- log2(ratios.avg[,1]) - log2(ratios.avg[,2])
+    
+    for (i in 2:(ncol(ratios.avg)-1)) {
+      for (j in (i+1):(ncol(ratios.avg))) {
+        max.fc <- matrixStats::rowMaxs(cbind(max.fc, log2(ratios.avg[,i]) - log2(ratios.avg[,j])))
+      }
     }
+    
+    boxp <- boxplot(max.fc, plot = FALSE)
+    ratios <- ratios[!(max.fc > max(boxp$stats)),]
+    
+    ratios <- log10(ratios)
+    if(class(ratios) == "numeric") {
+      col.sub <- mean(ratios)
+    } else {
+      col.sub <- rowMeans(ratios)
+    }
+    
+    ratios.norm <- ratios - col.sub
+    
+    if(class(ratios.norm) == "numeric") {
+      factors <- ratios.norm
+    } else {
+      factors <- 10^(matrixStats::colMedians(ratios.norm))
+    }
+    
+    
+  } else {
+    factors <- as.numeric(non.enriched.mat/enriched.mat)
+  }
+	if(!is.null(plot.fc)) {
+	for(i in plot.fc$control) {
+	  for(j in plot.fc$samples) {
+		a.original <- rowMeans(log2(enriched.original.mat[,which(techRep==i)]+1),na.rm=TRUE)
+		b.original <- rowMeans(log2(enriched.original.mat[,which(techRep==j)]+1),na.rm=TRUE)
+		fc.original <- a.original - b.original
+		a.normnalized <- rowMeans(log2(enriched.normalized.mat[,which(techRep==i)]+1),na.rm=TRUE)
+		b.normnalized <- rowMeans(log2(enriched.normalized.mat[,which(techRep==j)]+1),na.rm=TRUE)
+		fc.normnalized <- a.normnalized - b.normnalized
+		boxplot(cbind(fc.original, fc.normnalized), range=1.5, outline=FALSE, main=paste0("Peptide log fold changes", " (sample ", j, " vs sample ", i, ")"), names=c("Median normalized","Pairwise normalized"))
+		abline(h=0, lty=2)}
+	}
 
-  }
-  return(data.frame(seqMod, enriched.normalized.mat))
-  
+	}
+  cat(paste0("The number of overlap betweem enriched and non-enriched samples is: ", length(inter))
+  cat(paste0(length(plot.fc$samples) * length(plot.fc$control), " plots are generated. Please browse through them!"))
+  data.frame(seqMod, t(t(enriched.original.mat) * factors)) 
 }
