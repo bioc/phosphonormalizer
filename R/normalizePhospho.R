@@ -88,9 +88,9 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
   
   enriched[,"modSeq"] <- paste(enriched$seq, enriched$mod,sep = ", ")
   non.enriched[,"modSeq"] <- paste(non.enriched$seq, non.enriched$mod,sep = ", ")
-  
+
   inter <- intersect(non.enriched$modSeq, enriched$modSeq)
-  
+
   stopifnot(length(inter) > 0)
   enriched.olp.idx <- which(enriched$modSeq %in% inter)
   non.enriched.olp.idx <- which(non.enriched$modSeq %in% inter)
@@ -147,7 +147,8 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
   } else {
     factors <- as.numeric(non.enriched.mat/enriched.mat)
   }
-	if(!is.null(plot.fc)) {
+  enriched.normalized.mat <- t(t(enriched.original.mat) * factors)
+  	if(!is.null(plot.fc)) {
 	for(i in plot.fc$control) {
 	  for(j in plot.fc$samples) {
 		a.original <- rowMeans(log2(enriched.original.mat[,which(techRep==i)]+1),na.rm=TRUE)
@@ -161,7 +162,7 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
 	}
 
 	}
-  cat(paste0("The number of overlap betweem enriched and non-enriched samples is: ", length(inter))
-  cat(paste0(length(plot.fc$samples) * length(plot.fc$control), " plots are generated. Please browse through them!"))
+  message(paste0("The number of peptides in the intersect is: ", length(inter)))
+  message(paste0(length(plot.fc$control) * length(plot.fc$samples), " plots generated. Browse through them."))
   data.frame(seqMod, t(t(enriched.original.mat) * factors)) 
 }
