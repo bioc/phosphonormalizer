@@ -14,19 +14,24 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-Phosphoproteomics is identification, quantification and analysis of peptides that have phosphorylation as post-translational modification. Differential expression analysis of phosphopeptides between different samples would help study pathways and drug targets. Consequently, proper data normalization is a critical step in the workflow and median normalization is a common method that is utilized in this step of analysis. However, it is shown that global median normalization can introduce bias in the fold change of global phosphorylation between samples. It is suggested that by taking the non-enriched data into consideration, this bias could be compensated (Kauko et al. 2015).
+Global centering-based normalization is a commonly-used normalization approach in mass spectrometry (MS) -based label-free proteomics. It scales the peptide abundances to have the same median intensities, based on an assumption that the majority of abundances remain the same across the samples. However, especially in phosphoproteomics experiments, this assumption can introduce bias, as the enrichment of phosphopeptides during sample preparation can mask large unidirectional biological changes. Therefore, a novel method called pairwise normalization has been introduced that addresses this possible bias by utilizing phosphopeptides quantified in both enriched and non-enriched samples to calculate factors that mitigate the bias (Kauko et al. 2015). The phosphonormalizer package implements the pairwise normalization (Saraei et al., under review ).
 
-## Algorithm overview
+The phosphonormalizer package (Saraei et al. under review) normalizes the enriched samples in label-free MS-based phosphoproteomics using phosphopeptides that are present in both enriched and non-enriched data of the same samples. If there are no common phosphopeptides between the enriched and non-enriched data, then the normalization is not possible and an error is generated. 
 
-The phosphonormalizer package tries to find phosphopeptides that are present in both enriched and non-enriched datasets with the same sequence and modification. If there is no common phosphopeptides between enriched and non-enriched samples the normalization is not possible and an error will be generated. Phosphopeptides considered in the normalization procedure must be quantified in all samples. Additionally, phosphopeptides quantified multiple times are summed together. Moreover, ratios with maximum fold difference more than 1.5x interquartile range will be excluded (Kauko et al. 2015). 
-
-After finding the common phosphopeptides, the enriched/non-enriched ratios are calculated and normalized. The median of abundance ratios is used as pairwise normalization factor, which is used to normalize the enriched samples (Kauko et al. 2015).
 
 ## Input data
 
 In order to use phosphonormalizer package, we assume that the experiment have been conducted on both enriched and non-enriched samples. These datasets must have the sequence, modification and abundance columns. The sequence and modification columns in the dataframe must be in character format and the abundance columns in numeric. The algorithm expects that the abundances are pre-normalized with median normalization (Kauko et al. 2015). This package also supports MSnSet data type from MSnbase package which is used in data preprocessing 
 step of bioconductor mass spectrometry proteomics workflow (see more: https://www.bioconductor.org/help/workflows/proteomics/).
 
+```{r eval=TRUE}
+    #Load the library
+    library(phosphonormalizer)
+  	#Enriched data overview
+  	head(enriched.rd)
+  	#Non-enriched data overview
+  	head(non.enriched.rd)
+```
 
 ## Pairwise normalization
 
