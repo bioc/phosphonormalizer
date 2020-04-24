@@ -19,15 +19,15 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
   #Check the type of the arguments
   class.dfCols <- function(df, types)
   {
-    all(apply(df, MARGIN = 2, class) %in% types)
+    all(apply(df, MARGIN = 2, function(x) class(x)[1]) %in% types)
   }
-  if(class(enriched) != "data.frame" & class(enriched) != "MSnSet")
+  if(!is(enriched, "data.frame") & !is(enriched, "MSnSet"))
     stop("The enriched parameter must be of either types of data.frame or MSnSet")
   
-  if(class(non.enriched) != "data.frame" & class(non.enriched) != "MSnSet")
+  if(!is(non.enriched, "data.frame") & !is(non.enriched, "MSnSet"))
     stop("The non.enriched parameter must be of either types of data.frame or MSnSet")
   
-  if(class(enriched) == "MSnSet") 
+  if(is(enriched, "MSnSet")) 
   {
     enriched.eset <- enriched
     enriched <- cbind(MSnbase::fData(enriched)[, modseqCols$enriched], MSnbase::exprs(enriched)[, samplesCols$enriched])
@@ -36,16 +36,16 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
     samplesCols <- data.frame(enriched = 3:ncol(enriched), non.enriched = 3:ncol(non.enriched))
   }
   
-  if(!is.null(phospho) & class(phospho) != "character")
+  if(!is.null(phospho) & !is(phospho, "character"))
     stop("The phospho parameter must be of type of character")
   
-  if(class(samplesCols) != "data.frame" | 
+  if(!is(samplesCols, "data.frame") | 
      ncol(samplesCols) != 2 | !class.dfCols(samplesCols, c("integer","numeric")) | 
      all(!colnames(samplesCols) %in% c("enriched", "non.enriched")))
     stop("The samplesCols must be data.frame with two columns, with the column names enriched and non.enriched
          , of type numeric or integer, which must contain the column number of samples that hold the abundances")
   
-  if(class(modseqCols) != "data.frame" | 
+  if(!is(modseqCols, "data.frame") | 
      ncol(modseqCols) != 2 | !class.dfCols(modseqCols, c("integer","numeric")) | 
      all(!colnames(modseqCols) %in% c("enriched", "non.enriched")))
     stop("The modseqCols must be data.frame with two columns, with the names enriched and non.enriched
