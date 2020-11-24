@@ -129,10 +129,10 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
     ratios <- ratios[!(max.fc > max(boxp$stats)),]
     
     ratios <- log10(ratios)
-    if(class(ratios) == "numeric") {
-      col.sub <- mean(ratios)
-    } else {
+    if(is.matrix(ratios) | is.data.frame(ratios)) {
       col.sub <- rowMeans(ratios)
+    } else {
+      col.sub <- mean(ratios)
     }
     
     ratios.norm <- ratios - col.sub
