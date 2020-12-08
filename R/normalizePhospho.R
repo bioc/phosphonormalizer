@@ -36,16 +36,16 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
     samplesCols <- data.frame(enriched = 3:ncol(enriched), non.enriched = 3:ncol(non.enriched))
   }
   
-  if(!is.null(phospho) & !is(phospho, "character"))
+  if(!is.null(phospho) & !methods::is(phospho, "character"))
     stop("The phospho parameter must be of type of character")
   
-  if(!is(samplesCols, "data.frame") | 
+  if(!methods::is(samplesCols, "data.frame") | 
      ncol(samplesCols) != 2 | !class.dfCols(samplesCols, c("integer","numeric")) | 
      all(!colnames(samplesCols) %in% c("enriched", "non.enriched")))
     stop("The samplesCols must be data.frame with two columns, with the column names enriched and non.enriched
          , of type numeric or integer, which must contain the column number of samples that hold the abundances")
   
-  if(!is(modseqCols, "data.frame") | 
+  if(!methods::is(modseqCols, "data.frame") | 
      ncol(modseqCols) != 2 | !class.dfCols(modseqCols, c("integer","numeric")) | 
      all(!colnames(modseqCols) %in% c("enriched", "non.enriched")))
     stop("The modseqCols must be data.frame with two columns, with the names enriched and non.enriched
@@ -129,7 +129,7 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
     ratios <- ratios[!(max.fc > max(boxp$stats)),]
     
     ratios <- log10(ratios)
-    if(is.matrix(ratios) | is.data.frame(ratios)) {
+    if(methods::is(ratios, "matrix") | methods::is(ratios, "data.frame")) {
       col.sub <- rowMeans(ratios)
     } else {
       col.sub <- mean(ratios)
@@ -137,16 +137,15 @@ normalizePhospho <- function(enriched, non.enriched, phospho = NULL, samplesCols
     
     ratios.norm <- ratios - col.sub
     
-    if(class(ratios.norm) == "numeric") {
-      factors <- ratios.norm
-    } else {
+    if(methods::is(ratios, "matrix") | methods::is(ratios, "data.frame")) {
       factors <- 10^(matrixStats::colMedians(ratios.norm))
+    } else {
+      factors <- ratios.norm
     }
-    
-    
   } else {
     factors <- as.numeric(non.enriched.mat/enriched.mat)
   }
+
   enriched.normalized.mat <- t(t(enriched.original.mat) * factors)
   	if(!is.null(plot.fc)) {
 	for(i in plot.fc$control) {
