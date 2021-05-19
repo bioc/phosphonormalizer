@@ -1,7 +1,7 @@
 Package: phosphonormalizer
 Type: Package
 Title: Compensates for the bias introduced by median normalization in
-Version: 1.16.0
+Version: 1.17.0
 Date: 2016-11-11
 Authors@R: 
   c(
